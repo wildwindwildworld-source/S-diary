@@ -1,0 +1,10 @@
+{
+  "name": "Stool & Appliance Diary",
+  "description": "排便（量・硬さ）の記録とストーマ装具の在庫管理を行う個人向けのWebアプリケーション。直感的なカレンダー、1タップのクイック入力、豊富な統計機能、CSV/JSONでのバックアップに対応しています。",
+  "requestFramePermissions": [
+    "vibrate"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
