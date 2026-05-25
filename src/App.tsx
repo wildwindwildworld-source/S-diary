@@ -322,8 +322,66 @@ export default function App() {
     showSuccessLogToast("データを初期化しました。");
   };
 
+  // Swipe tab switching logic for touchscreen/mobile users
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.targetTouches.length === 1) {
+      setTouchStartX(e.targetTouches[0].clientX);
+      setTouchStartY(e.targetTouches[0].clientY);
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX === null || touchStartY === null) return;
+    if (e.changedTouches.length !== 1) return;
+
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+
+    const diffX = touchEndX - touchStartX;
+    const diffY = touchEndY - touchStartY;
+
+    // Horizontal swipe must be greater than vertical and cross 60px distance threshold
+    const minSwipeDistance = 60;
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > minSwipeDistance) {
+      // Keep user experience smooth by ignoring swipes while typing comments or updating forms
+      const activeEl = document.activeElement;
+      if (
+        activeEl && (
+          activeEl.tagName === "INPUT" || 
+          activeEl.tagName === "TEXTAREA" || 
+          activeEl.getAttribute("contenteditable") === "true"
+        )
+      ) {
+        return;
+      }
+
+      const tabOrder: ("quick" | "diary" | "stats" | "stock")[] = ["quick", "diary", "stats", "stock"];
+      const currentIndex = tabOrder.indexOf(activeTab);
+
+      if (diffX > 0) {
+        // Swiped Right -> Pull Previous/Left Tab
+        const prevIndex = (currentIndex - 1 + tabOrder.length) % tabOrder.length;
+        setActiveTab(tabOrder[prevIndex]);
+      } else {
+        // Swiped Left -> Pull Next/Right Tab
+        const nextIndex = (currentIndex + 1) % tabOrder.length;
+        setActiveTab(tabOrder[nextIndex]);
+      }
+    }
+
+    setTouchStartX(null);
+    setTouchStartY(null);
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
+    <div 
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      className="min-h-screen bg-slate-50 text-slate-800 font-sans p-4 sm:p-6 lg:p-8 flex flex-col gap-6"
+    >
       <style>{`
         @keyframes shake {
           0%, 100% { transform: translate(0, 0) rotate(0deg); }
